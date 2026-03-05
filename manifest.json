@@ -1,0 +1,10 @@
+{
+  "name": "Divine Beats",
+  "short_name": "Divine Beats",
+  "description": "Store, search, and manage Christian devotional songs",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8B4513",
+  "orientation": "portrait"
+}

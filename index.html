@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Divine Beats - Store and search Christian hymns">
+    <meta name="theme-color" content="#8B4513">
+    <title>Divine Beats</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header>
+            <h1>🎵 Divine Beats</h1>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="home">
+                <span>🏠</span>
+                <span>Home</span>
+            </button>
+            <button class="tab-btn" data-tab="browse">
+                <span>📚</span>
+                <span>Browse</span>
+            </button>
+            <button class="tab-btn" data-tab="search">
+                <span>🔍</span>
+                <span>Search</span>
+            </button>
+            <button class="tab-btn" data-tab="add">
+                <span>➕</span>
+                <span>Add Song</span>
+            </button>
+        </nav>
+
+        <!-- Home Tab -->
+        <div id="home" class="tab-content active">
+            <div class="container">
+                <div class="dashboard">
+                    <div class="welcome-section">
+                        <h1 class="dashboard-title">🎵 Divine Beats</h1>
+                        <p class="dashboard-subtitle">Your Christian Devotional Songs Collection</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎶</div>
+                            <div class="stat-value" id="totalSongs">0</div>
+                            <div class="stat-label">Total Songs</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-value" id="totalCategories">11</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+                        <h3>Quick Actions</h3>
+                        <div class="action-buttons">
+                            <button class="action-btn" onclick="switchTab('browse')">
+                                <span class="action-icon">📚</span>
+                                <span>Browse Songs</span>
+                            </button>
+                            <button class="action-btn" onclick="switchTab('search')">
+                                <span class="action-icon">🔍</span>
+                                <span>Search</span>
+                            </button>
+                            <button class="action-btn" onclick="switchTab('add')">
+                                <span class="action-icon">➕</span>
+                                <span>Add New Song</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="recent-section">
+                        <h3>Recently Added</h3>
+                        <div id="recentSongs"></div>
+                        <div id="noRecentSongs" class="empty-message" style="display: none;">
+                            <p>🎵 No songs yet. Start adding your favorite devotional songs!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browse Tab -->
+        <div id="browse" class="tab-content">
+            <div class="container">
+                <div class="category-filter">
+                    <button class="filter-chip active" data-filter="all">All</button>
+                    <button class="filter-chip" data-filter="Entrance">പ്രവേശനം</button>
+                    <button class="filter-chip" data-filter="Offering">കാഴ്ചവയ്പ്പ്</button>
+                    <button class="filter-chip" data-filter="Eucharist">ദിവ്യകാരുണ്യം</button>
+                    <button class="filter-chip" data-filter="Mary">മാതാവ്</button>
+                    <button class="filter-chip" data-filter="Worship">ആരാധന</button>
+                    <button class="filter-chip" data-filter="Christmas">ക്രിസ്തുമസ്</button>
+                    <button class="filter-chip" data-filter="HolyWeek">വിശുദ്ധവാരം</button>
+                    <button class="filter-chip" data-filter="Wedding">വിവാഹം</button>
+                    <button class="filter-chip" data-filter="Easter">ഈസ്റ്റർ</button>
+                    <button class="filter-chip" data-filter="HolySpirit">പരിശുദ്ധാത്മാവ്</button>
+                    <button class="filter-chip" data-filter="Thanksgiving">നന്ദി / സ്തുതി</button>
+                </div>
+                <div id="songsList"></div>
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">🎵</div>
+                    <h2>No songs yet</h2>
+                    <p>Tap the + icon to add your first devotional song</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div id="search" class="tab-content">
+            <div class="container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search by title, lyrics, author, or tags...">
+                    <button id="clearSearch" class="clear-btn" style="display: none;">✕</button>
+                </div>
+                <div id="searchResults"></div>
+                <div id="searchEmptyState" class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h2>Search for devotional songs</h2>
+                    <p>Find songs by title, lyrics, author, or tags</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Song Tab -->
+        <div id="add" class="tab-content">
+            <div class="container">
+                <h2 id="formTitle" class="form-title">➕ Add New Song</h2>
+                <form id="addSongForm" class="song-form">
+                    <div class="form-group">
+                        <label>Title <span class="required">*</span></label>
+                        <input type="text" id="songTitle" required placeholder="Enter song title">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lyrics <span class="required">*</span></label>
+                        <textarea id="songLyrics" required placeholder="Enter song lyrics" rows="8"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Author</label>
+                        <input type="text" id="songAuthor" placeholder="Enter author name (optional)">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <div class="category-chips" id="categoryChips">
+                            <button type="button" class="chip" data-category="Entrance">പ്രവേശനം</button>
+                            <button type="button" class="chip" data-category="Offering">കാഴ്ചവയ്പ്പ്</button>
+                            <button type="button" class="chip" data-category="Eucharist">ദിവ്യകാരുണ്യം</button>
+                            <button type="button" class="chip" data-category="Mary">മാതാവ്</button>
+                            <button type="button" class="chip" data-category="Worship">ആരാധന</button>
+                            <button type="button" class="chip" data-category="Christmas">ക്രിസ്തുമസ്</button>
+                            <button type="button" class="chip" data-category="HolyWeek">വിശുദ്ധവാരം</button>
+                            <button type="button" class="chip" data-category="Wedding">വിവാഹം</button>
+                            <button type="button" class="chip" data-category="Easter">ഈസ്റ്റർ</button>
+                            <button type="button" class="chip" data-category="HolySpirit">പരിശുദ്ധാത്മാവ്</button>
+                            <button type="button" class="chip" data-category="Thanksgiving">നന്ദി / സ്തുതി</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tags</label>
+                        <input type="text" id="songTags" placeholder="e.g., joy, peace, hope (comma separated)">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Save Song</button>
+                        <button type="button" id="clearForm" class="btn btn-secondary">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Song Detail Modal -->
+        <div id="songDetailModal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" id="closeModal">✕</button>
+                <div id="songDetail"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
