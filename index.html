@@ -103,28 +103,10 @@
                             <div class="stat-value" id="totalSongs">0</div>
                             <div class="stat-label">Total Songs</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card clickable" id="categoriesCard" onclick="openCategoriesModal()">
                             <div class="stat-icon">📋</div>
                             <div class="stat-value" id="totalCategories">11</div>
                             <div class="stat-label">Categories</div>
-                        </div>
-                    </div>
-
-                    <div class="quick-actions">
-                        <h3>Quick Actions</h3>
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="switchTab('browse')">
-                                <span class="action-icon">📚</span>
-                                <span>Browse Songs</span>
-                            </button>
-                            <button class="action-btn" onclick="switchTab('search')">
-                                <span class="action-icon">🔍</span>
-                                <span>Search</span>
-                            </button>
-                            <button class="action-btn" onclick="switchTab('add')">
-                                <span class="action-icon">➕</span>
-                                <span>Add New Song</span>
-                            </button>
                         </div>
                     </div>
 
@@ -241,6 +223,28 @@
         </div>
     </div>
 
+    <!-- Categories Modal -->
+    <div id="categoriesModal" class="modal" onclick="if(event.target===this) closeCategoriesModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 Manage Categories</h2>
+                <button class="close-btn" onclick="closeCategoriesModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="category-list" id="categoryList"></div>
+                <div class="add-category-section">
+                    <h3>Add New Category</h3>
+                    <div class="add-category-form">
+                        <input type="text" id="newCategoryNameEn" placeholder="Category name (English)" maxlength="30">
+                        <input type="text" id="newCategoryNameMl" placeholder="Category name (Malayalam)" maxlength="30">
+                        <input type="text" id="newCategoryColor" placeholder="Color code (e.g., #FF5733)" value="#8B4513">
+                        <button class="btn btn-primary" onclick="addNewCategory()">➕ Add Category</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Passcode Login Screen -->
     <div id="loginScreen" class="login-screen">
         <div class="login-container">
@@ -258,7 +262,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="db.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js" defer></script>
     <script>
         // Register service worker
         if ('serviceWorker' in navigator) {
