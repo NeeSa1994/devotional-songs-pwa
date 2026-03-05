@@ -6,10 +6,66 @@ let currentFilter = 'all'; // Track current category filter
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    // Check if logged in
+    if (!isLoggedIn()) {
+        showLoginScreen();
+        return;
+    }
+    
+    // Hide login screen and show app
+    hideLoginScreen();
     await initDB();
     setupEventListeners();
     loadDashboard();
 });
+
+// Show login screen
+function showLoginScreen() {
+    const loginScreen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
+    loginScreen.classList.remove('hidden');
+    app.style.display = 'none';
+    
+    // Setup login handlers
+    const loginBtn = document.getElementById('loginBtn');
+    const passcodeInput = document.getElementById('passcodeInput');
+    const loginError = document.getElementById('loginError');
+    
+    const handleLogin = () => {
+        const inputPasscode = passcodeInput.value.trim();
+        if (verifyPasscode(inputPasscode)) {
+            setLoggedIn(true);
+            hideLoginScreen();
+            initApp();
+        } else {
+            loginError.style.display = 'block';
+            passcodeInput.value = '';
+            passcodeInput.focus();
+        }
+    };
+    
+    loginBtn.onclick = handleLogin;
+    passcodeInput.onkeypress = (e) => {
+        if (e.key === 'Enter') handleLogin();
+    };
+    
+    passcodeInput.focus();
+}
+
+// Hide login screen
+function hideLoginScreen() {
+    const loginScreen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
+    loginScreen.classList.add('hidden');
+    app.style.display = 'block';
+}
+
+// Initialize app after login
+async function initApp() {
+    await initDB();
+    setupEventListeners();
+    loadDashboard();
+}
 
 // Setup event listeners
 function setupEventListeners() {
