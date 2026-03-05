@@ -19,7 +19,7 @@ async function addSong(song) {
             updated_at: new Date().toISOString()
         };
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClientClient
             .from('songs')
             .insert([songData])
             .select();
@@ -35,7 +35,7 @@ async function addSong(song) {
 // Get all songs
 async function getAllSongs() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('songs')
             .select('*')
             .order('created_at', { ascending: false });
@@ -62,7 +62,7 @@ async function getAllSongs() {
 // Get song by ID
 async function getSongById(id) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('songs')
             .select('*')
             .eq('id', id)
@@ -89,7 +89,7 @@ async function getSongById(id) {
 // Search songs
 async function searchSongs(searchTerm) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('songs')
             .select('*')
             .or(`title.ilike.%${searchTerm}%,lyrics.ilike.%${searchTerm}%,author.ilike.%${searchTerm}%,tags.ilike.%${searchTerm}%`)
@@ -130,7 +130,7 @@ async function updateSong(id, song) {
             updateData.created_at = song.createdAt;
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('songs')
             .update(updateData)
             .eq('id', id)
@@ -147,7 +147,7 @@ async function updateSong(id, song) {
 // Delete song
 async function deleteSong(id) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('songs')
             .delete()
             .eq('id', id);
