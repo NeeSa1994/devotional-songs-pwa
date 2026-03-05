@@ -19,7 +19,7 @@ async function addSong(song) {
             updated_at: new Date().toISOString()
         };
 
-        const { data, error } = await supabaseClientClient
+        const { data, error } = await supabaseClient
             .from('songs')
             .insert([songData])
             .select();
