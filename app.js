@@ -6,17 +6,11 @@ let currentFilter = 'all'; // Track current category filter
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check if logged in
-    if (!isLoggedIn()) {
-        showLoginScreen();
-        return;
-    }
+    // Always clear login on fresh load
+    setLoggedIn(false);
     
-    // Hide login screen and show app
-    hideLoginScreen();
-    await initDB();
-    setupEventListeners();
-    await loadDashboard();
+    // Always show login screen
+    showLoginScreen();
 });
 
 // Show login screen
@@ -74,6 +68,61 @@ async function initApp() {
     setupEventListeners();
     await loadDashboard();
     displayUserInfo();
+    
+    // Setup realtime sync
+    setupRealtimeSync(handleRealtimeUpdate);
+}
+
+// Handle realtime updates
+async function handleRealtimeUpdate(payload) {
+    console.log('Song updated in realtime:', payload);
+    
+    // Show a subtle notification
+    showRealtimeNotification();
+    
+    // Refresh the current view
+    const activeTab = document.querySelector('.tab-content.active');
+    if (activeTab) {
+        const tabId = activeTab.id;
+        if (tabId === 'home') {
+            await loadDashboard();
+        } else if (tabId === 'browse') {
+            await loadSongs();
+        } else if (tabId === 'search') {
+            await handleSearch();
+        }
+    }
+}
+
+// Show realtime notification
+function showRealtimeNotification() {
+    // Check if notification already exists
+    if (document.getElementById('realtimeNotification')) return;
+    
+    const notification = document.createElement('div');
+    notification.id = 'realtimeNotification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 1001;
+        font-size: 0.875rem;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = '🔄 Songs updated';
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 // Setup event listeners

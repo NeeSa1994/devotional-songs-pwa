@@ -59,3 +59,39 @@ function verifyCredentials(username, password) {
     }
     return null;
 }
+
+// Realtime subscription
+let realtimeChannel = null;
+
+// Setup realtime subscription for songs table
+function setupRealtimeSync(onSongChange) {
+    // Unsubscribe from previous channel if exists
+    if (realtimeChannel) {
+        supabaseClient.removeChannel(realtimeChannel);
+    }
+    
+    // Subscribe to songs table changes
+    realtimeChannel = supabaseClient
+        .channel('songs-changes')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'songs' },
+            (payload) => {
+                console.log('Realtime update:', payload);
+                if (onSongChange) {
+                    onSongChange(payload);
+                }
+            }
+        )
+        .subscribe();
+    
+    console.log('Realtime sync enabled');
+}
+
+// Cleanup realtime subscription
+function cleanupRealtimeSync() {
+    if (realtimeChannel) {
+        supabaseClient.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+    }
+}
