@@ -520,6 +520,9 @@ async function showSongDetail(id) {
               ).join('')
             : '';
         
+        const editBtn = isAdmin() ? `<button class="btn btn-edit" onclick="editSong(${song.id})">✏️ Edit</button>` : '';
+        const deleteBtn = isAdmin() ? `<button class="btn btn-delete" onclick="handleDeleteSongFromDetail(${song.id})">🗑️ Delete</button>` : '';
+        
         detailContainer.innerHTML = `
             <div class="song-detail-header">
                 <h2 class="song-detail-title">${escapeHtml(song.title)}</h2>
@@ -534,9 +537,9 @@ async function showSongDetail(id) {
             </div>
             
             <div class="detail-actions">
-                <button class="btn btn-edit" onclick="editSong(${song.id})">✏️ Edit</button>
+                ${editBtn}
                 <button class="btn btn-share" onclick="shareSong(${song.id})">📤 Share</button>
-                <button class="btn btn-delete" onclick="handleDeleteSongFromDetail(${song.id})">🗑️ Delete</button>
+                ${deleteBtn}
             </div>
             
             ${song.createdAt ? `<p class="timestamp">Added on ${new Date(song.createdAt).toLocaleDateString()}</p>` : ''}
