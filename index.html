@@ -66,6 +66,7 @@
         <!-- Header -->
         <header>
             <h1>🎵 Divine Beats</h1>
+            <div id="userInfo" style="font-size: 0.875rem; margin-top: 0.25rem; opacity: 0.9;"></div>
         </header>
 
         <!-- Navigation Tabs -->
@@ -172,6 +173,7 @@
                     <div class="form-group">
                         <label>Title <span class="required">*</span></label>
                         <input type="text" id="songTitle" required placeholder="Enter song title">
+                        <p id="duplicateWarning" class="duplicate-warning" style="display: none;">⚠️ A song with this title already exists!</p>
                     </div>
 
                     <div class="form-group">
@@ -209,6 +211,7 @@
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">💾 Save Song</button>
                         <button type="button" id="clearForm" class="btn btn-secondary">Clear Form</button>
+                        <button type="button" id="discardEdit" class="btn btn-secondary" style="display: none;">❌ Discard</button>
                     </div>
                 </form>
             </div>
@@ -251,9 +254,10 @@
             <h1>🎵 Divine Beats</h1>
             <p class="login-subtitle">Christian Devotional Songs</p>
             <div class="login-form">
-                <input type="password" id="passcodeInput" placeholder="Enter passcode" autocomplete="off">
-                <button id="loginBtn" class="btn btn-primary">Enter</button>
-                <p id="loginError" class="login-error" style="display: none;">Incorrect passcode. Please try again.</p>
+                <input type="text" id="usernameInput" placeholder="Username" autocomplete="username">
+                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+                <button id="loginBtn" class="btn btn-primary">Login</button>
+                <p id="loginError" class="login-error" style="display: none;">Incorrect username or password. Please try again.</p>
             </div>
         </div>
     </div>

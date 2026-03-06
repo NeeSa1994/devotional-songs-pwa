@@ -28,28 +28,36 @@ function showLoginScreen() {
     
     // Setup login handlers
     const loginBtn = document.getElementById('loginBtn');
-    const passcodeInput = document.getElementById('passcodeInput');
+    const usernameInput = document.getElementById('usernameInput');
+    const passwordInput = document.getElementById('passwordInput');
     const loginError = document.getElementById('loginError');
     
     const handleLogin = () => {
-        const inputPasscode = passcodeInput.value.trim();
-        if (verifyPasscode(inputPasscode)) {
-            setLoggedIn(true);
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        const userData = verifyCredentials(username, password);
+        if (userData) {
+            setLoggedIn(true, userData.username, userData.role, userData.displayName);
             hideLoginScreen();
             initApp();
         } else {
             loginError.style.display = 'block';
-            passcodeInput.value = '';
-            passcodeInput.focus();
+            passwordInput.value = '';
+            usernameInput.focus();
         }
     };
     
     loginBtn.onclick = handleLogin;
-    passcodeInput.onkeypress = (e) => {
+    usernameInput.onkeypress = (e) => {
+        if (e.key === 'Enter') {
+            passwordInput.focus();
+        }
+    };
+    passwordInput.onkeypress = (e) => {
         if (e.key === 'Enter') handleLogin();
     };
     
-    passcodeInput.focus();
+    usernameInput.focus();
 }
 
 // Hide login screen
@@ -65,10 +73,14 @@ async function initApp() {
     await initDB();
     setupEventListeners();
     await loadDashboard();
+    displayUserInfo();
 }
 
 // Setup event listeners
 function setupEventListeners() {
+    // Apply role-based UI restrictions
+    applyRoleRestrictions();
+    
     // Tab navigation
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -82,6 +94,13 @@ function setupEventListeners() {
     // Form submission
     document.getElementById('addSongForm').addEventListener('submit', handleAddSong);
     document.getElementById('clearForm').addEventListener('click', clearForm);
+    document.getElementById('discardEdit').addEventListener('click', discardEdit);
+
+    // Title duplicate check
+    const titleInput = document.getElementById('songTitle');
+    if (titleInput) {
+        titleInput.addEventListener('input', checkDuplicateTitle);
+    }
 
     // Search
     const searchInput = document.getElementById('searchInput');
@@ -196,6 +215,37 @@ function selectCategory(chip) {
     selectedCategory = chip.dataset.category;
 }
 
+// Check for duplicate song title
+async function checkDuplicateTitle() {
+    const titleInput = document.getElementById('songTitle');
+    const duplicateWarning = document.getElementById('duplicateWarning');
+    const title = titleInput.value.trim();
+    
+    if (!title || editingSongId) {
+        // Don't check if empty or editing existing song
+        duplicateWarning.style.display = 'none';
+        return false;
+    }
+    
+    try {
+        const songs = await getAllSongs();
+        const duplicate = songs.find(song => 
+            song.title.toLowerCase() === title.toLowerCase()
+        );
+        
+        if (duplicate) {
+            duplicateWarning.style.display = 'block';
+            return true;
+        } else {
+            duplicateWarning.style.display = 'none';
+            return false;
+        }
+    } catch (error) {
+        console.error('Error checking duplicate:', error);
+        return false;
+    }
+}
+
 // Load and display songs
 async function loadSongs() {
     try {
@@ -254,17 +304,15 @@ async function loadSongs() {
 
 // Create song card HTML
 function createSongCard(song) {
+    const deleteBtn = isAdmin() ? `<button class="delete-btn" data-id="${song.id}" title="Delete">🗑️</button>` : '';
     return `
         <div class="song-card" data-id="${song.id}">
             <div class="song-card-header">
                 <div>
                     <div class="song-title">${escapeHtml(song.title)}</div>
-                    ${song.author ? `<div class="song-author">By ${escapeHtml(song.author)}</div>` : ''}
-                    ${song.category ? `<span class="category-badge">${escapeHtml(getCategoryDisplayName(song.category))}</span>` : ''}
                 </div>
-                <button class="delete-btn" data-id="${song.id}" title="Delete">🗑️</button>
+                ${deleteBtn}
             </div>
-            <div class="song-preview">${escapeHtml(song.lyrics)}</div>
         </div>
     `;
 }
@@ -281,6 +329,15 @@ async function handleAddSong(e) {
     if (!title || !lyrics) {
         alert('Please fill in title and lyrics');
         return;
+    }
+    
+    // Check for duplicate only when adding new song (not editing)
+    if (!editingSongId) {
+        const isDuplicate = await checkDuplicateTitle();
+        if (isDuplicate) {
+            alert('⚠️ A song with this title already exists. Please use a different title.');
+            return;
+        }
     }
     
     const song = {
@@ -316,13 +373,16 @@ async function handleAddSong(e) {
 function updateFormTitle() {
     const formTitle = document.getElementById('formTitle');
     const submitBtn = document.querySelector('#addSongForm button[type="submit"]');
+    const discardBtn = document.getElementById('discardEdit');
     
     if (editingSongId) {
         formTitle.textContent = '✏️ Edit Song';
         submitBtn.innerHTML = '💾 Update Song';
+        if (discardBtn) discardBtn.style.display = 'inline-block';
     } else {
         formTitle.textContent = '➕ Add New Song';
         submitBtn.innerHTML = '💾 Save Song';
+        if (discardBtn) discardBtn.style.display = 'none';
     }
 }
 
@@ -332,6 +392,14 @@ function clearForm() {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
     document.querySelector('[data-category="Entrance"]').classList.add('selected');
     selectedCategory = 'Entrance';
+}
+
+// Discard edit and return to browse
+function discardEdit() {
+    editingSongId = null;
+    clearForm();
+    updateFormTitle();
+    switchTab('browse');
 }
 
 // Handle search
@@ -733,4 +801,35 @@ function updateCategorySelects() {
 function getCategoryDisplayName(category) {
     const categories = getAllCategories();
     return categories[category]?.ml || category;
+}
+
+// Apply role-based UI restrictions
+function applyRoleRestrictions() {
+    const role = getUserRole();
+    const isUserAdmin = isAdmin();
+    
+    // Hide Add Song tab for regular users
+    const addTabBtn = document.querySelector('.tab-btn[data-tab="add"]');
+    if (addTabBtn) {
+        addTabBtn.style.display = isUserAdmin ? 'flex' : 'none';
+    }
+    
+    // Hide categories management for regular users
+    const categoriesCard = document.getElementById('categoriesCard');
+    if (categoriesCard) {
+        categoriesCard.style.cursor = isUserAdmin ? 'pointer' : 'default';
+        if (!isUserAdmin) {
+            categoriesCard.onclick = null;
+        }
+    }
+}
+
+// Display user info in header
+function displayUserInfo() {
+    const userInfoEl = document.getElementById('userInfo');
+    if (userInfoEl) {
+        const displayName = getDisplayName();
+        const role = getUserRole();
+        userInfoEl.textContent = `Logged in as ${displayName} (${role})`;
+    }
 }
